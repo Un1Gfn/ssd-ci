@@ -21,7 +21,7 @@ jobs:
       - run:
           name: Overwrite working directory
           command: |
-            cd $CIRCLE_WORKING_DIRECTORY/..
+            cd ~
             rm -rfv $CIRCLE_WORKING_DIRECTORY
             git clone --recurse-submodules https://github.com/CGDF-Github/SSD-Android.git $CIRCLE_WORKING_DIRECTORY
             cd $CIRCLE_WORKING_DIRECTORY
