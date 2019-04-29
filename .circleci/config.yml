@@ -25,14 +25,19 @@ jobs:
             cd ~
             rm -rfv $WD
             git clone --recurse-submodules https://github.com/CGDF-Github/SSD-Android.git $WD
-            # cd ~/$WD
-            # git submodule update --init --progress --recursive
       - run:
-          name: Tweak
+          name: Add fancy build info
           command: |
-            export versionName="D.$(printf "%02d" $(git rev-list --count HEAD)).$(git rev-parse --short HEAD)"
-            sed -i "s#\(^ *versionName = \).*#\1'$versionName'#g" build.gradle
-            git diff build.gradle
+            sed --in-place "/<body>/ a \        <p>\
+            &#128296; \
+            <a href="https://github.com/TheCGDF/SSD-Android/tree/$(git rev-parse HEAD)">\
+            r$(printf "%02d" $(git rev-list --count HEAD)).$(git rev-parse --short HEAD)\
+            </a> \
+            w/ &#128156; \
+            by <a href="https://circleci.com/gh/Un1Gfn/SSD-ci/$CIRCLE_BUILD_NUM">CircleCi</a> \
+            &#128347; $(TZ=Asia/Shanghai date +'%F %T UTC%-:::z') \
+            </p>" mobile/src/main/res/raw/about.html
+            git diff
       # - restore_cache:
       #     key: jars-{{ checksum "build.gradle" }}
       # - run:
