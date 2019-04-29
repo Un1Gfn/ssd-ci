@@ -27,6 +27,8 @@ jobs:
             git clone --recurse-submodules https://github.com/CGDF-Github/SSD-Android.git $WD
       - run:
           name: Add fancy build info
+          # Bad circleci, BAD.
+          # https://github.com/GlowstoneMC/Glowstone/issues/3#issuecomment-189753866
           command: |
             sed --in-place "/<body>/ a \        <p>\
             &#128296; \
@@ -34,7 +36,7 @@ jobs:
             r$(printf "%02d" $(git rev-list --count HEAD)).$(git rev-parse --short HEAD)\
             </a> \
             w/ &#128156; \
-            by <a href="https://circleci.com/gh/Un1Gfn/SSD-ci/$CIRCLE_BUILD_NUM">CircleCi</a> \
+            by <a href="https://circleci.com/gh/Un1Gfn/SSD-ci/${CIRCLE_BUILD_NUM}#artifacts">CircleCi</a> \
             &#128347; $(TZ=Asia/Shanghai date +'%F %T UTC%-:::z') \
             </p>" mobile/src/main/res/raw/about.html
             git diff
