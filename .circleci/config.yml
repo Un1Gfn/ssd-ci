@@ -18,12 +18,16 @@ jobs:
     resource_class: medium
     steps:
       - checkout
-      - run: git submodule update --init --progress --recursive
+      - run:
+        name: Overwrite working directory
+        command: |
+          cd "$CIRCLE_WORKING_DIRECTORY"/..
+          rm -rfv "$CIRCLE_WORKING_DIRECTORY"
+          git clone --recurse-submodules https://github.com/CGDF-Github/SSD-Android.git "$CIRCLE_WORKING_DIRECTORY"
+          cd "$CIRCLE_WORKING_DIRECTORY"
+          # git submodule update --init --progress --recursive
       - restore_cache:
           key: jars-{{ checksum "build.gradle" }}
-#      - run:
-#         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
-#         command: sudo chmod +x ./gradlew
       - run:
           name: Download Dependencies
           # https://circleci.com/docs/2.0/language-android/#disabling-pre-dexing-to-improve-build-performance
