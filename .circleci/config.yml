@@ -31,7 +31,7 @@ jobs:
           name: Tweak
           command: |
             export versionCode=$(printf "%02d" $(git rev-list --count HEAD))
-            export versionName=ssd-r$versionCode.$(git rev-parse --short HEAD)-circleci
+            export versionName="D $versionCode.$(git rev-parse --short HEAD)"
             sed -i "s#\(^ *versionCode = \).*#\1$versionCode#g" build.gradle
             sed -i "s#\(^ *versionName = \).*#\1'$versionName'#g" build.gradle
             git diff build.gradle
