@@ -1,0 +1,81 @@
+# https://circleci.com/docs/2.0/language-android/#sample-configuration
+# https://github.com/shadowsocks/shadowsocks-android/blob/master/.circleci/config.yml
+
+version: 2
+jobs:
+  build:
+    working_directory: ~/code
+    docker:
+      # https://circleci.com/docs/2.0/circleci-images/
+      # https://github.com/CircleCI-Public/circleci-dockerfiles/tree/master/android/images
+      # https://en.wikipedia.org/wiki/Debian_version_history
+      # - image: circleci/android:lastest
+      # - image: circleci/android:api-25-alpha
+      - image: circleci/android:api-28-ndk
+    environment:
+      # https://circleci.com/docs/2.0/language-android/#handling-out-of-memory-errors
+      JVM_OPTS: -Xmx3200m
+    resource_class: medium
+    steps:
+      - checkout
+      - run: git submodule update --init --progress --recursive
+      - restore_cache:
+          key: jars-{{ checksum "build.gradle" }}
+#      - run:
+#         name: Chmod permissions #if permission for Gradlew Dependencies fail, use this.
+#         command: sudo chmod +x ./gradlew
+      - run:
+          name: Download Dependencies
+          # https://circleci.com/docs/2.0/language-android/#disabling-pre-dexing-to-improve-build-performance
+          command: ./gradlew androidDependencies
+      - save_cache:
+          paths:
+            - ~/.gradle
+            - ~/.android/build-cache
+          key: jars-{{ checksum "build.gradle" }}
+      - run:
+          name: Build release APK
+          command: |
+            ./gradlew assembleRelease
+      - run:
+          name: Align & sign APK
+          command: |
+            export PATH=$PATH:/opt/android/sdk/build-tools/28.0.3/
+            yes \
+              | keytool \
+              -genkeypair \
+              -alias my-alias \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000 \
+              -keypass 000000 \
+              -keystore my-release-key.jks \
+              -storepass 000000 \
+              -v || true
+            for i in {mobile,tv}/build/outputs/apk/release/*.apk; do
+              ORIG="$i"
+              ALIGNED="${i%-unsigned.apk}-unsigned-aligned.apk"
+              SIGNED="${i%-unsigned.apk}-signed-aligned.apk"
+              zipalign -v -p 4 $ORIG $ALIGNED
+              apksigner sign --ks my-release-key.jks --ks-pass pass:000000 --out $SIGNED $ALIGNED
+            done
+            cp -v my-release-key.jks mobile/build/outputs/apk/release/
+            cp -v my-release-key.jks tv/build/outputs/apk/release/
+            rm -fv my-release-key.jks
+
+      # https://circleci.com/docs/2.0/artifacts/ 
+      # https://circleci.com/docs/2.0/artifacts/#downloading-all-artifacts-for-a-build-on-circleci
+      - store_artifacts:
+          path: mobile/build/outputs/apk/release/
+          destination: mobile
+      - store_artifacts:
+          path: tv/build/outputs/apk/release/
+          destination: tv
+
+      # - run:
+      #     name: Run Tests
+      #     command: ./gradlew lint test
+
+      # - store_test_results: # for display in Test Summary: https://circleci.com/docs/2.0/collect-test-data/
+      #     path: app/build/test-results
+      # # See https://circleci.com/docs/2.0/deployment-integrations/ for deploy examples

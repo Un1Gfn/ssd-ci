@@ -1,0 +1,75 @@
+# git:
+#   depth: false
+#   submodules: true
+
+git:
+  depth: 1
+  submodules: false
+
+# branches:
+#   only:
+#   - master
+
+# # https://docs.travis-ci.com/user/reference/xenial/
+# dist: xenial
+# # sudo requirement is added because a license needs to be manually added later
+# sudo: required
+
+# API level 27(O) 28(P)
+# https://docs.travis-ci.com/user/languages/android/
+language: android
+android:
+  components:
+    - build-tools-24.0.2
+    # - build-tools
+    - ndk-bundle
+    - platform-tools
+    # - android-27
+    - android-22
+    - android-24
+    - tools
+    - add-on
+    - extra
+  # https://docs.travis-ci.com/user/languages/android/#dealing-with-licenses
+  # licenses:
+  #   - 'android-sdk-preview-license-52d11cd2'
+  #   - 'android-sdk-license-.+'
+  #   - 'google-gdk-license-.+'
+
+# addons:
+#   apt:
+#     update: true
+#     packages:
+#     - tree
+
+# https://docs.travis-ci.com/user/languages/java/#testing-against-multiple-jdks
+# jdk: openjdk11
+jdk: oraclejdk8
+
+# env:
+#   - FOO=1 BAR=2
+
+# https://docs.travis-ci.com/user/languages/android/#caching
+# https://docs.travis-ci.com/user/languages/java/#caching
+# before_cache:
+#   - rm -fv  $HOME/.gradle/caches/modules-2/modules-2.lock
+#   - rm -frv $HOME/.gradle/caches/*/plugin-resolution/
+#   - rm -fv  $HOME/.gradle/daemon/*/daemon-*.out.log
+# cache:
+#   timeout: 1000
+#   directories:
+#     - $HOME/.gradle/caches/
+#     - $HOME/.gradle/wrapper/
+#     - $HOME/.android/build-cache
+
+script:
+  # - yes | sdkmanager --licenses
+  # - tree -aCL 2 /usr/local/android-sdk
+  # - tree -aCL 2 $HOME
+  # - jdk_switcher use openjdk11
+  - ls /opt/android-sdk/licenses/ || true
+  - echo $ANDROID_HOME
+  - echo $JAVA_HOME
+  - echo $PATH
+  - ./gradlew assembleRelease
+  # Sign apk?
