@@ -5,6 +5,8 @@ version: 2
 jobs:
   build:
     environment:
+      # https://circleci.com/docs/2.0/language-android/#handling-out-of-memory-errors
+      JVM_OPTS: -Xmx3200m
       WD: code
     working_directory: ~/code
     docker:
@@ -14,9 +16,6 @@ jobs:
       # - image: circleci/android:lastest
       # - image: circleci/android:api-25-alpha
       - image: circleci/android:api-28-ndk
-    environment:
-      # https://circleci.com/docs/2.0/language-android/#handling-out-of-memory-errors
-      JVM_OPTS: -Xmx3200m
     resource_class: medium
     steps:
       - checkout
